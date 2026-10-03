@@ -1,5 +1,5 @@
-// Offline cache for Shudu. Bump CACHE when any asset below changes.
-const CACHE = "shudu-v1";
+// Offline cache for Shudu. Network-first when online, cached copies when offline.
+const CACHE = "shudu-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -30,12 +30,17 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
+  const request = event.request;
+  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy));
-      return response;
-    }).catch(() => caches.match("./index.html")))
+    fetch(request)
+      .then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache => cache.put(request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request).then(cached => cached || (request.mode === "navigate" ? caches.match("./index.html") : Response.error())))
   );
 });

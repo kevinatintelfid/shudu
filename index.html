@@ -22,7 +22,23 @@
   <script src="app.js" defer></script>
   <script>
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-      window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+      var hadController = Boolean(navigator.serviceWorker.controller);
+      var reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (!hadController) { hadController = true; return; }
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").then(function (registration) {
+          registration.update();
+          setInterval(function () { registration.update(); }, 60 * 60 * 1000);
+          document.addEventListener("visibilitychange", function () {
+            if (!document.hidden) registration.update();
+          });
+        }).catch(function () {});
+      });
     }
   </script>
 </head>
