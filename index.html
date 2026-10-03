@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7f5">
+  <meta name="description" content="An offline Sudoku game with three difficulties, pencil notes, and time-based ratings.">
+  <title>Shudu - Sudoku</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Shudu">
+  <link rel="stylesheet" href="styles.css">
+  <script>window.module = { exports: {} };</script>
+  <script src="qqwing.js"></script>
+  <script>window.QQWing = window.module.exports; delete window.module;</script>
+  <script src="game.js" defer></script>
+  <script src="lucide.min.js" defer></script>
+  <script src="app.js" defer></script>
+  <script>
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="Shudu home">
+      <img src="favicon.svg" width="34" height="34" alt="">
+      <span>shudu<span class="brand-dot">.</span></span>
+    </a>
+    <div class="header-end"><span class="edition">THE NUMBER CLUB</span><span class="offline-dot" aria-hidden="true"></span><span>Offline ready</span></div>
+  </header>
+
+  <main>
+    <div class="page-heading">
+      <div><div class="eyebrow">NINE BY NINE</div><h1>Sudoku<span class="title-dot">.</span></h1></div>
+      <div class="best-record"><i data-lucide="award" aria-hidden="true"></i><div><span class="eyebrow">PERSONAL BEST</span><strong id="best-score">--</strong></div></div>
+    </div>
+
+    <div class="game-layout">
+      <section class="board-section" aria-label="Sudoku puzzle">
+        <div class="board-topline">
+          <div class="puzzle-label"><span class="level-marker"></span><strong id="current-level">Easy</strong><span class="puzzle-state" id="puzzle-state">In progress</span></div>
+          <div class="timer-group"><i data-lucide="timer" aria-hidden="true"></i><time id="timer" aria-label="Elapsed time">00:00</time><button id="pause" class="icon-button small" title="Pause game" aria-label="Pause game"><i data-lucide="pause"></i></button></div>
+        </div>
+        <div class="board-frame">
+          <div id="board" role="grid" aria-label="Sudoku, 9 rows and 9 columns" aria-rowcount="9" aria-colcount="9"></div>
+          <div id="board-cover" class="board-cover">
+            <div id="cover-icon" class="cover-icon"><i data-lucide="loader-circle"></i></div>
+            <h2 id="cover-title">Finding your puzzle</h2>
+            <button id="resume" class="primary-button" hidden>Resume game <i data-lucide="play"></i></button>
+          </div>
+        </div>
+        <div class="board-bottomline"><span id="filled-count">0 / 81 filled</span><div class="completion-track" role="progressbar" aria-label="Filled cells" aria-valuemin="0" aria-valuemax="81" aria-valuenow="0"><span id="completion-fill"></span></div><span id="percent">0%</span></div>
+        <p id="announcement" class="announcement" role="status" aria-live="polite"></p>
+      </section>
+
+      <aside class="controls" aria-label="Game controls">
+        <div class="new-game-controls"><label class="eyebrow" for="difficulty">YOUR CHALLENGE</label><div class="difficulty-wrap"><select id="difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select><i data-lucide="chevron-down" aria-hidden="true"></i></div><button id="new-game" class="primary-button">New game <i data-lucide="arrow-up-right"></i></button></div>
+
+        <div class="input-controls">
+          <div class="mode-switch" role="group" aria-label="Entry mode"><button id="number-mode" aria-pressed="true" title="Confirm numbers"><i data-lucide="hash"></i>Number</button><button id="notes-mode" aria-pressed="false" title="Pencil notes (N)"><i data-lucide="pencil"></i>Notes</button></div>
+          <div id="number-pad" class="number-pad" role="group" aria-label="Choose a number"></div>
+          <div class="tools" role="group" aria-label="Editing tools">
+            <button id="undo" class="tool-button" title="Undo (Ctrl+Z)" aria-label="Undo"><i data-lucide="undo-2"></i><span>Undo</span></button>
+            <button id="redo" class="tool-button" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><i data-lucide="redo-2"></i><span>Redo</span></button>
+            <button id="erase" class="tool-button" title="Erase (Delete)" aria-label="Erase"><i data-lucide="eraser"></i><span>Erase</span></button>
+            <button id="hint" class="tool-button" title="Reveal one number; adds 60 seconds to your rating time" aria-label="Hint"><i data-lucide="lightbulb"></i><span>Hint</span></button>
+          </div>
+        </div>
+
+        <section class="pace-section" aria-label="Time rating">
+          <div class="pace-heading"><span class="eyebrow">CURRENT PACE</span><div id="pace-stars" class="pace-stars" aria-label="3 stars"><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i></div></div>
+          <div class="pace-line"><strong id="pace-label">Three-star pace</strong><span id="target-time">10:00 target</span></div>
+          <div class="hint-line"><span>Hints used</span><span id="hint-count">0</span></div>
+        </section>
+      </aside>
+    </div>
+    <footer><span><i data-lucide="circle-check" aria-hidden="true"></i><span id="save-status">Saved on this device</span></span><span>One square at a time.</span></footer>
+  </main>
+
+  <dialog id="new-dialog" aria-labelledby="new-title"><div class="dialog-symbol"><i data-lucide="refresh-cw"></i></div><h2 id="new-title">A fresh start?</h2><p>Your current puzzle will be replaced.</p><div class="dialog-actions"><button id="cancel-new" class="secondary-button">Keep playing</button><button id="confirm-new" class="primary-button">New game <i data-lucide="arrow-right"></i></button></div></dialog>
+
+  <dialog id="win-dialog" aria-labelledby="win-title"><button id="close-win" class="icon-button dialog-close" title="View completed board" aria-label="Close results"><i data-lucide="x"></i></button><div class="win-stars" id="win-stars"><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i></div><div class="eyebrow">EVERY NUMBER IN ITS PLACE</div><h2 id="win-title">Nicely solved.</h2><div class="final-score"><strong id="final-score">1,000</strong><span>POINTS</span></div><dl class="result-details"><div><dt>Difficulty</dt><dd id="final-level">Easy</dd></div><div><dt>Your time</dt><dd id="final-time">00:00</dd></div><div><dt>Hints</dt><dd id="final-hints">0</dd></div><div><dt>Rating time</dt><dd id="final-adjusted">00:00</dd></div></dl><button id="play-again" class="primary-button">Another puzzle <i data-lucide="arrow-right"></i></button></dialog>
+</body>
+</html>
